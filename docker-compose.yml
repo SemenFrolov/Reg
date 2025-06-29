@@ -1,0 +1,46 @@
+services:
+  postgres:
+    image: postgres:14
+    environment:
+      POSTGRES_USER: Simon
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: db
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  server:
+    build: ./server
+    restart: unless-stopped
+    volumes:
+      - ./server:/app
+    depends_on:
+      - postgres
+    environment:
+      - DB_HOST=postgres
+      - DB_USER=Simon
+      - DB_PASSWORD=123
+      - DB_NAME=db
+      - DB_PORT=5432
+    
+
+  client:
+    build: ./client
+    volumes:
+      - ./client:/app
+    depends_on:
+      - server
+    environment: 
+      - DB_HOST=postgres
+      - DB_USER=Simon
+      - DB_PASSWORD=123
+      - DB_NAME=db
+      - DB_PORT=5432
+
+    stdin_open: true
+    tty: true
+
+
+volumes:
+  postgres_data:
